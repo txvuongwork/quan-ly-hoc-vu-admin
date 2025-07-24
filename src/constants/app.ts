@@ -7,4 +7,5 @@ export const API_URLS = {
 
 export const QUERY_KEYS = {
   profile: "profile",
+  majors: "majors",
 };
