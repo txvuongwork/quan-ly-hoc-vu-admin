@@ -10,6 +10,7 @@ import { useNavigate } from "react-router-dom";
 
 export const CreateSubjectPage: React.FunctionComponent = () => {
   const navigate = useNavigate();
+
   const {
     register,
     handleSubmit,

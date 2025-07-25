@@ -7,4 +7,10 @@ export const API_URLS = {
 
 export const QUERY_KEYS = {
   profile: "profile",
+  subjects: "subjects",
+};
+
+export const DATE_FORMAT = {
+  DATE: "dd/MM/yyyy",
+  DATE_TIME: "dd/MM/yyyy HH:mm:ss",
 };

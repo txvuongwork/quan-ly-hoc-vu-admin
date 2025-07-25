@@ -6,3 +6,6 @@ export * from "./label";
 export * from "./sonner";
 export * from "./avatar";
 export * from "./dropdown-menu";
+export * from "./card";
+export * from "./table";
+export * from "./error-state";
