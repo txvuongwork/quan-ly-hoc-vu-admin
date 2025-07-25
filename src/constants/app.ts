@@ -8,6 +8,7 @@ export const API_URLS = {
 export const QUERY_KEYS = {
   profile: "profile",
   subjects: "subjects",
+  majors: "majors",
 };
 
 export const DATE_FORMAT = {
