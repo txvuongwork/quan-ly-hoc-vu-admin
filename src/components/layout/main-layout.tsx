@@ -54,7 +54,7 @@ export const MainLayout: FunctionComponent = () => {
     }
 
     // For dashboard paths, only exact match
-    if (path === ROUTES.ADMIN.DASHBOARD || path === ROUTES.APP.HOME) {
+    if (path === ROUTES.APP.HOME) {
       return false;
     }
 
@@ -83,14 +83,19 @@ export const MainLayout: FunctionComponent = () => {
     if (currentUser.role === EUserRole.ADMIN) {
       return [
         {
-          title: "Tổng quan",
-          icon: School,
-          href: ROUTES.ADMIN.DASHBOARD,
+          title: "Quản lý ngành học",
+          icon: GraduationCap,
+          href: ROUTES.ADMIN.MAJOR.ROOT,
         },
         {
           title: "Quản lý môn học",
           icon: BookOpen,
           href: ROUTES.ADMIN.SUBJECTS.ROOT,
+        },
+        {
+          title: "Quản lý lớp học",
+          icon: School,
+          href: ROUTES.ADMIN.CLASSES.ROOT,
         },
       ];
     }

@@ -9,7 +9,14 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnReconnect: false,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 const router = createBrowserRouter([
   {
@@ -24,23 +31,89 @@ const router = createBrowserRouter([
         path: ROUTES.ADMIN.ROOT,
         children: [
           {
-            index: true,
-            element: (
-              <AdminPrivate>
-                <Pages.AdminDashboardPage />
-              </AdminPrivate>
-            ),
-          },
-          {
             path: ROUTES.ADMIN.SUBJECTS.ROOT,
             children: [
               {
                 index: true,
-                element: <Pages.SubjectsPage />,
+                element: (
+                  <AdminPrivate>
+                    <Pages.SubjectsPage />
+                  </AdminPrivate>
+                ),
               },
               {
                 path: ROUTES.ADMIN.SUBJECTS.CREATE,
-                element: <Pages.CreateSubjectPage />,
+                element: (
+                  <AdminPrivate>
+                    <Pages.CreateSubjectPage />
+                  </AdminPrivate>
+                ),
+              },
+              {
+                path: ROUTES.ADMIN.SUBJECTS.EDIT,
+                element: (
+                  <AdminPrivate>
+                    <Pages.EditSubjectPage />
+                  </AdminPrivate>
+                ),
+              },
+            ],
+          },
+          {
+            path: ROUTES.ADMIN.MAJOR.ROOT,
+            children: [
+              {
+                index: true,
+                element: (
+                  <AdminPrivate>
+                    <Pages.MajorsPage />
+                  </AdminPrivate>
+                ),
+              },
+              {
+                path: ROUTES.ADMIN.MAJOR.CREATE,
+                element: (
+                  <AdminPrivate>
+                    <Pages.CreateMajorPage />
+                  </AdminPrivate>
+                ),
+              },
+              {
+                path: ROUTES.ADMIN.MAJOR.EDIT,
+                element: (
+                  <AdminPrivate>
+                    <Pages.EditMajorPage />
+                  </AdminPrivate>
+                ),
+              },
+            ],
+          },
+          {
+            path: ROUTES.ADMIN.CLASSES.ROOT,
+            children: [
+              {
+                index: true,
+                element: (
+                  <AdminPrivate>
+                    <Pages.ClassesPage />
+                  </AdminPrivate>
+                ),
+              },
+              {
+                path: ROUTES.ADMIN.CLASSES.CREATE,
+                element: (
+                  <AdminPrivate>
+                    <Pages.CreateClassPage />
+                  </AdminPrivate>
+                ),
+              },
+              {
+                path: ROUTES.ADMIN.CLASSES.EDIT,
+                element: (
+                  <AdminPrivate>
+                    <Pages.EditClassPage />
+                  </AdminPrivate>
+                ),
               },
             ],
           },

@@ -1,10 +1,18 @@
-import { useGetSubjects } from "@/api/subjectApi";
+import { useDeleteSubject, useGetSubjects } from "@/api/subjectApi";
 import { SubjectsTable } from "@/components/feature/subject";
-import { Button, Card, CardContent, ErrorState } from "@/components/ui";
+import {
+  Button,
+  Card,
+  CardContent,
+  ConfirmDialog,
+  ErrorState,
+} from "@/components/ui";
 import { ROUTES } from "@/constants";
 import { Plus } from "lucide-react";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { generatePath, useNavigate } from "react-router-dom";
+import { toast } from "sonner";
+import { translate } from "@/translate/helpers";
 
 const pageSize = 10;
 
@@ -12,24 +20,65 @@ export function SubjectsPage() {
   const navigate = useNavigate();
 
   const [currentPage, setCurrentPage] = useState<number>(1);
+  const [deleteModal, setDeleteModal] = useState<{
+    isOpen: boolean;
+    subjectId: number | null;
+    subjectName: string;
+  }>({
+    isOpen: false,
+    subjectId: null,
+    subjectName: "",
+  });
 
-  const { data: response, isLoading } = useGetSubjects({
+  const {
+    data: response,
+    isLoading,
+    refetch,
+  } = useGetSubjects({
     page: currentPage - 1,
     size: pageSize,
   });
+  const { mutateAsync: deleteSubject, isPending: isDeleting } =
+    useDeleteSubject();
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
   };
 
   const handleEdit = (id: number) => {
-    console.log("Edit subject:", id);
-    // Navigate to edit subject page
+    navigate(generatePath(ROUTES.ADMIN.SUBJECTS.EDIT, { id: id.toString() }));
   };
 
-  const handleDelete = (id: number) => {
-    console.log("Delete subject:", id);
-    // Show confirmation dialog and delete
+  const handleDelete = (id: number, subjectName: string) => {
+    setDeleteModal({
+      isOpen: true,
+      subjectId: id,
+      subjectName,
+    });
+  };
+
+  const handleConfirmDelete = async () => {
+    if (deleteModal.subjectId) {
+      await deleteSubject(deleteModal.subjectId, {
+        onSuccess: (response) => {
+          if (response.ok) {
+            toast.success("Xóa môn học thành công");
+          } else {
+            toast.error(translate(response.error.message));
+          }
+          handleCloseDeleteModal();
+          refetch();
+        },
+      });
+    }
+  };
+
+  const handleCloseDeleteModal = () => {
+    setDeleteModal({
+      isOpen: false,
+      subjectId: null,
+      subjectName: "",
+    });
   };
 
   const handleAddSubject = () => {
@@ -95,6 +144,18 @@ export function SubjectsPage() {
           />
         </CardContent>
       </Card>
+
+      <ConfirmDialog
+        isOpen={deleteModal.isOpen}
+        onClose={handleCloseDeleteModal}
+        onConfirm={handleConfirmDelete}
+        title="Xóa môn học"
+        description={`Bạn có chắc chắn muốn xóa môn học "${deleteModal.subjectName}"? Hành động này không thể hoàn tác.`}
+        confirmText="Xóa"
+        cancelText="Hủy"
+        variant="destructive"
+        isLoading={isDeleting}
+      />
     </div>
   );
 }

@@ -18,7 +18,7 @@ interface SubjectsTableProps {
   };
   onPageChange: (page: number) => void;
   onEdit: (id: number) => void;
-  onDelete: (id: number) => void;
+  onDelete: (id: number, subjectName: string) => void;
   isLoading?: boolean;
 }
 
@@ -101,7 +101,7 @@ export function SubjectsTable({
               <Button
                 variant="destructive"
                 size="sm"
-                onClick={() => onDelete(subject.id)}
+                onClick={() => onDelete(subject.id, subject.subjectName)}
               >
                 <Trash2 className="h-4 w-4" />
               </Button>

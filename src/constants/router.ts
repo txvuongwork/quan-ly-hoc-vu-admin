@@ -5,11 +5,20 @@ export const ROUTES = {
   },
   ADMIN: {
     ROOT: "/admin",
-    DASHBOARD: "/admin",
     SUBJECTS: {
       ROOT: "/admin/subjects",
       CREATE: "/admin/subjects/create",
       EDIT: "/admin/subjects/:id",
+    },
+    MAJOR: {
+      ROOT: "/admin/majors",
+      CREATE: "/admin/majors/create",
+      EDIT: "/admin/majors/:id",
+    },
+    CLASSES: {
+      ROOT: "/admin/classes",
+      CREATE: "/admin/classes/create",
+      EDIT: "/admin/classes/:id",
     },
   },
   TEACHER: {

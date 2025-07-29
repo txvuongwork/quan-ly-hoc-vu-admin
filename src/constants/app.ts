@@ -9,6 +9,9 @@ export const QUERY_KEYS = {
   profile: "profile",
   subjects: "subjects",
   majors: "majors",
+  semesters: "semesters",
+  classes: "classes",
+  users: "users",
 };
 
 export const DATE_FORMAT = {

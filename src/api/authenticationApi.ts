@@ -27,7 +27,7 @@ export const useLogin = () => {
         localStorage.setItem(ACCESS_TOKEN_KEY, response.body.token);
         queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.profile] });
         if (response.body.user.role === EUserRole.ADMIN) {
-          navigate(ROUTES.ADMIN.DASHBOARD);
+          navigate(ROUTES.ADMIN.MAJOR.ROOT);
         } else {
           navigate(ROUTES.APP.HOME);
         }

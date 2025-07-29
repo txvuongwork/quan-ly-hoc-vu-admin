@@ -14,6 +14,11 @@ export const createSubjectSchema = z.object({
     .min(4, "Mã môn học phải có ít nhất 4 ký tự")
     .max(10, "Mã môn học không được quá 10 ký tự"),
   description: z.string().trim().optional(),
+  majorId: z.string().min(1, "Ngành học là bắt buộc"),
+  credits: z
+    .string()
+    .min(1, "Số tín chỉ là bắt buộc")
+    .regex(/^[1-4]$/, "Số tín chỉ phải từ 1-4"),
 });
 
 export type CreateSubjectSchemaType = z.infer<typeof createSubjectSchema>;
