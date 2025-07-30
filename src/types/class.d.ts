@@ -3,6 +3,13 @@ import type { TSemester } from "./semester";
 import type { TSubject } from "./subject";
 import type { TUser } from "./user";
 
+export type TClassSchedule = {
+  id: number;
+  dayOfWeek: number;
+  startPeriod: number;
+  endPeriod: number;
+};
+
 export type TClass = {
   id: number;
   classCode: string;
@@ -18,4 +25,5 @@ export type TClass = {
   finalPercent: number;
   status: EClassStatus;
   createdAt: string;
+  schedules: TClassSchedule[];
 };

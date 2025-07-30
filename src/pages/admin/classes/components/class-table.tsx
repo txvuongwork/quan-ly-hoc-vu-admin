@@ -1,6 +1,7 @@
 import { CommonTable } from "@/components/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { DAYS_OF_WEEK } from "@/constants";
 import { EClassStatus } from "@/enums";
 import { ClassMapper } from "@/mapper/class";
 import type { TClass } from "@/types/class";
@@ -20,6 +21,18 @@ interface ClassesTableProps {
   onEdit: (id: number) => void;
   isLoading?: boolean;
 }
+
+const getDayLabel = (dayOfWeek: number) => {
+  return DAYS_OF_WEEK.find((day) => day.value === dayOfWeek)?.label;
+};
+
+const getPeriodLabel = (startPeriod: number, endPeriod: number) => {
+  if (startPeriod === endPeriod) {
+    return `Tiết ${startPeriod}`;
+  }
+
+  return `Tiết ${startPeriod} - ${endPeriod}`;
+};
 
 export function ClassesTable({
   data,
@@ -64,6 +77,23 @@ export function ClassesTable({
         cell: ({ row }) => (
           <p className="max-w-[250px] truncate">
             {row.original.semester.semesterName}
+          </p>
+        ),
+      },
+      {
+        accessorKey: "schedules",
+        header: "Lịch học",
+        cell: ({ row }) => (
+          <p className="whitespace-pre-line">
+            {row.original.schedules
+              .map(
+                (schedule) =>
+                  `${getDayLabel(schedule.dayOfWeek)} - ${getPeriodLabel(
+                    schedule.startPeriod,
+                    schedule.endPeriod
+                  )}`
+              )
+              .join("\n")}
           </p>
         ),
       },

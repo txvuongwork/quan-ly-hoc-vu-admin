@@ -1,18 +1,10 @@
-import { ClassesTable } from "./components";
-import {
-  Button,
-  Card,
-  CardContent,
-  //   ConfirmDialog,
-  ErrorState,
-} from "@/components/ui";
+import { useGetClasses } from "@/api/classApi";
+import { Button, Card, CardContent, ErrorState } from "@/components/ui";
 import { ROUTES } from "@/constants";
 import { Plus } from "lucide-react";
 import { useState } from "react";
 import { generatePath, useNavigate } from "react-router-dom";
-// import { toast } from "sonner";
-// import { translate } from "@/translate/helpers";
-import { useGetClasses } from "@/api/classApi";
+import { ClassesTable } from "./components";
 
 const pageSize = 10;
 
@@ -20,25 +12,11 @@ export function ClassesPage() {
   const navigate = useNavigate();
 
   const [currentPage, setCurrentPage] = useState<number>(1);
-  //   const [deleteModal, setDeleteModal] = useState<{
-  //     isOpen: boolean;
-  //     majorId: number | null;
-  //     majorName: string;
-  //   }>({
-  //     isOpen: false,
-  //     majorId: null,
-  //     majorName: "",
-  //   });
 
-  const {
-    data: response,
-    isLoading,
-    // refetch,
-  } = useGetClasses({
+  const { data: response, isLoading } = useGetClasses({
     page: currentPage - 1,
     size: pageSize,
   });
-  //   const { mutateAsync: deleteMajor, isPending: isDeleting } = useDeleteMajor();
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -47,38 +25,6 @@ export function ClassesPage() {
   const handleEdit = (id: number) => {
     navigate(generatePath(ROUTES.ADMIN.CLASSES.EDIT, { id: id.toString() }));
   };
-
-  //   const handleDelete = (id: number, majorName: string) => {
-  //     setDeleteModal({
-  //       isOpen: true,
-  //       majorId: id,
-  //       majorName,
-  //     });
-  //   };
-
-  //   const handleConfirmDelete = async () => {
-  //     if (deleteModal.majorId) {
-  //       await deleteMajor(deleteModal.majorId, {
-  //         onSuccess: (response) => {
-  //           if (response.ok) {
-  //             toast.success("Xóa ngành học thành công");
-  //           } else {
-  //             toast.error(translate(response.error.message));
-  //           }
-  //           handleCloseDeleteModal();
-  //           refetch();
-  //         },
-  //       });
-  //     }
-  //   };
-
-  //   const handleCloseDeleteModal = () => {
-  //     setDeleteModal({
-  //       isOpen: false,
-  //       majorId: null,
-  //       majorName: "",
-  //     });
-  //   };
 
   const handleAddMajor = () => {
     navigate(ROUTES.ADMIN.CLASSES.CREATE);
@@ -138,23 +84,10 @@ export function ClassesPage() {
             pagination={paginationInfo}
             onPageChange={handlePageChange}
             onEdit={handleEdit}
-            // onDelete={handleDelete}
             isLoading={isLoading}
           />
         </CardContent>
       </Card>
-
-      {/* <ConfirmDialog
-        isOpen={deleteModal.isOpen}
-        onClose={handleCloseDeleteModal}
-        onConfirm={handleConfirmDelete}
-        title="Xóa lớp học"
-        description={`Bạn có chắc chắn muốn xóa lớp học "${deleteModal.majorName}"? Hành động này không thể hoàn tác.`}
-        confirmText="Xóa"
-        cancelText="Hủy"
-        variant="destructive"
-        isLoading={isDeleting}
-      /> */}
     </div>
   );
 }

@@ -2,6 +2,7 @@ export const ROUTES = {
   APP: {
     ROOT: "/",
     HOME: "/",
+    REGISTER_CLASS: "/register-class",
   },
   ADMIN: {
     ROOT: "/admin",

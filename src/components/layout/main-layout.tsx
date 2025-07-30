@@ -100,6 +100,21 @@ export const MainLayout: FunctionComponent = () => {
       ];
     }
 
+    if (currentUser.role === EUserRole.STUDENT) {
+      return [
+        {
+          title: "Lịch học",
+          icon: Calendar,
+          href: ROUTES.APP.ROOT,
+        },
+        {
+          title: "Đăng ký lớp",
+          icon: ClipboardList,
+          href: ROUTES.APP.REGISTER_CLASS,
+        },
+      ];
+    }
+
     return [
       {
         title: "Tổng quan",

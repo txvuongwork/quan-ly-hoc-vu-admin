@@ -1,5 +1,25 @@
 import { z } from "zod";
 
+export const createClassScheduleSchema = z
+  .object({
+    dayOfWeek: z
+      .number()
+      .min(1, "Ngày trong tuần là bắt buộc")
+      .max(7, "Ngày trong tuần không hợp lệ"),
+    startPeriod: z
+      .number()
+      .min(1, "Tiết bắt đầu là bắt buộc")
+      .max(10, "Tiết bắt đầu không hợp lệ"),
+    endPeriod: z
+      .number()
+      .min(1, "Tiết kết thúc là bắt buộc")
+      .max(10, "Tiết kết thúc không hợp lệ"),
+  })
+  .refine((data) => data.startPeriod <= data.endPeriod, {
+    message: "Tiết bắt đầu phải nhỏ hơn hoặc bằng tiết kết thúc",
+    path: ["endPeriod"],
+  });
+
 export const createClassSchema = z
   .object({
     classCode: z
@@ -32,6 +52,10 @@ export const createClassSchema = z
       .min(1, "Phần trăm cuối kỳ là bắt buộc")
       .regex(/^(100|[1-9]?\d)$/, "Phần trăm cuối kỳ phải từ 0-100"),
     status: z.string().optional(),
+    schedules: z
+      .array(createClassScheduleSchema)
+      .min(1, "Cần ít nhất một lịch học")
+      .max(10, "Tối đa 10 lịch học"),
   })
   .refine(
     (data) => {
@@ -76,6 +100,37 @@ export const createClassSchema = z
     {
       message: "Tổng phần trăm điểm phải bằng 100%",
       path: ["finalPercent"],
+    }
+  )
+  .refine(
+    (data) => {
+      // Check for schedule conflicts
+      const schedules = data.schedules;
+      if (!schedules || schedules.length <= 1) return true;
+
+      for (let i = 0; i < schedules.length; i++) {
+        for (let j = i + 1; j < schedules.length; j++) {
+          const schedule1 = schedules[i];
+          const schedule2 = schedules[j];
+
+          // Same day check
+          if (schedule1.dayOfWeek === schedule2.dayOfWeek) {
+            // Check period overlap
+            const overlap = !(
+              schedule1.endPeriod < schedule2.startPeriod ||
+              schedule2.endPeriod < schedule1.startPeriod
+            );
+            if (overlap) {
+              return false;
+            }
+          }
+        }
+      }
+      return true;
+    },
+    {
+      message: "Lịch học không được trùng nhau",
+      path: ["schedules"],
     }
   );
 
