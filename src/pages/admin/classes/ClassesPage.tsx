@@ -1,22 +1,49 @@
-import { useGetClasses } from "@/api/classApi";
+import { useGetClasses, useUpdateStatus } from "@/api/classApi";
 import { Button, Card, CardContent, ErrorState } from "@/components/ui";
 import { ROUTES } from "@/constants";
 import { Plus } from "lucide-react";
 import { useState } from "react";
 import { generatePath, useNavigate } from "react-router-dom";
-import { ClassesTable } from "./components";
+import {
+  ChangeStatusModal,
+  ClassesTable,
+  type TValidateSchema,
+} from "./components";
+import type { TClass } from "@/types";
+import { translate } from "@/translate/helpers";
+import { toast } from "sonner";
 
 const pageSize = 10;
+
+type TChangeStatusModal =
+  | {
+      open: true;
+      classData: TClass;
+    }
+  | {
+      open: false;
+    };
 
 export function ClassesPage() {
   const navigate = useNavigate();
 
   const [currentPage, setCurrentPage] = useState<number>(1);
+  const [changeStatusModal, setChangeStatusModal] =
+    useState<TChangeStatusModal>({
+      open: false,
+    });
 
-  const { data: response, isLoading } = useGetClasses({
+  const {
+    data: response,
+    isFetching,
+    refetch,
+  } = useGetClasses({
     page: currentPage - 1,
     size: pageSize,
   });
+
+  const { mutateAsync: updateStatus, isPending: isUpdatingStatus } =
+    useUpdateStatus();
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -28,6 +55,10 @@ export function ClassesPage() {
 
   const handleAddMajor = () => {
     navigate(ROUTES.ADMIN.CLASSES.CREATE);
+  };
+
+  const handleOpenChangeStatusModal = (classData: TClass) => {
+    setChangeStatusModal({ open: true, classData });
   };
 
   if (response && !response.ok) {
@@ -67,6 +98,25 @@ export function ClassesPage() {
         pageSize: pageSize,
       };
 
+  const onSubmit = async (id: number, data: TValidateSchema) => {
+    await updateStatus(
+      {
+        id,
+        data: { status: data.status },
+      },
+      {
+        onSuccess: (response) => {
+          if (response.ok) {
+            toast.success("Cập nhật trạng thái thành công");
+            refetch();
+          } else {
+            toast.error(translate(response.error.message));
+          }
+        },
+      }
+    );
+  };
+
   return (
     <div className="container mx-auto py-6 space-y-6">
       <div className="flex items-center justify-between">
@@ -84,10 +134,21 @@ export function ClassesPage() {
             pagination={paginationInfo}
             onPageChange={handlePageChange}
             onEdit={handleEdit}
-            isLoading={isLoading}
+            onOpenChangeStatusModal={handleOpenChangeStatusModal}
+            isLoading={isFetching}
           />
         </CardContent>
       </Card>
+
+      <ChangeStatusModal
+        open={changeStatusModal.open}
+        onClose={() => setChangeStatusModal({ open: false })}
+        onSubmit={onSubmit}
+        classData={
+          changeStatusModal.open ? changeStatusModal.classData : undefined
+        }
+        isLoading={isUpdatingStatus}
+      />
     </div>
   );
 }

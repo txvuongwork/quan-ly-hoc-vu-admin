@@ -1,5 +1,6 @@
 export enum EClassStatus {
-  OPEN = "OPEN",
+  OPENED = "OPENED",
   CLOSED = "CLOSED",
   CANCELED = "CANCELED",
+  WAITING_REGISTER = "WAITING_REGISTER",
 }

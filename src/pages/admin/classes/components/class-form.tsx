@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/select";
 import { ROUTES } from "@/constants";
 import { EClassStatus, ESemesterStatus } from "@/enums";
-import { ClassMapper } from "@/mapper/class";
+import { cn } from "@/lib/utils";
 import { createClassSchema, type CreateClassSchemaType } from "@/schemas";
 import type {
   TClass,
@@ -77,7 +77,6 @@ const getDefaultValue = (
       processPercent: "",
       midtermPercent: "",
       finalPercent: "",
-      status: EClassStatus.OPEN,
       schedules: [
         {
           dayOfWeek: 1,
@@ -97,7 +96,6 @@ const getDefaultValue = (
     processPercent: classData.processPercent.toString(),
     midtermPercent: classData.midtermPercent.toString(),
     finalPercent: classData.finalPercent.toString(),
-    status: classData.status,
     schedules:
       classData.schedules && classData.schedules.length > 0
         ? classData.schedules.map((schedule) => ({
@@ -174,6 +172,16 @@ export const ClassForm: FunctionComponent<ClassFormProps> = ({
       })),
     [teachers]
   );
+
+  const isDisableEdit = useMemo(() => {
+    if (!classData) return false;
+
+    return [
+      EClassStatus.CLOSED,
+      EClassStatus.CANCELED,
+      EClassStatus.OPENED,
+    ].includes(classData.status);
+  }, [classData]);
 
   const handleInput = (
     field: "processPercent" | "midtermPercent" | "finalPercent"
@@ -279,6 +287,7 @@ export const ClassForm: FunctionComponent<ClassFormProps> = ({
                 type="text"
                 placeholder="Ví dụ: TOAN101_01, LY102_02..."
                 control={control}
+                disabled={isDisableEdit}
               />
 
               <SelectField
@@ -288,6 +297,7 @@ export const ClassForm: FunctionComponent<ClassFormProps> = ({
                 options={subjectOptions}
                 control={control}
                 description="Chọn môn học cho lớp"
+                disabled={isDisableEdit}
               />
 
               <SelectField
@@ -297,6 +307,7 @@ export const ClassForm: FunctionComponent<ClassFormProps> = ({
                 options={semesterOptions}
                 control={control}
                 description="Chọn học kỳ diễn ra"
+                disabled={isDisableEdit}
               />
 
               <SelectField
@@ -306,6 +317,7 @@ export const ClassForm: FunctionComponent<ClassFormProps> = ({
                 options={teacherOptions}
                 control={control}
                 description="Chọn giáo viên phụ trách"
+                disabled={isDisableEdit}
               />
 
               <div className="grid grid-cols-2 gap-4">
@@ -316,6 +328,7 @@ export const ClassForm: FunctionComponent<ClassFormProps> = ({
                   numericOnly={true}
                   placeholder="Ví dụ: 10, 15, 20..."
                   control={control}
+                  disabled={isDisableEdit}
                 />
 
                 <ControlledFormField
@@ -325,6 +338,7 @@ export const ClassForm: FunctionComponent<ClassFormProps> = ({
                   numericOnly={true}
                   placeholder="Ví dụ: 30, 40, 50..."
                   control={control}
+                  disabled={isDisableEdit}
                 />
               </div>
 
@@ -339,6 +353,7 @@ export const ClassForm: FunctionComponent<ClassFormProps> = ({
                   inputProps={{
                     onInput: () => handleInput("processPercent"),
                   }}
+                  disabled={isDisableEdit}
                 />
 
                 <ControlledFormField
@@ -351,6 +366,7 @@ export const ClassForm: FunctionComponent<ClassFormProps> = ({
                   inputProps={{
                     onInput: () => handleInput("midtermPercent"),
                   }}
+                  disabled={isDisableEdit}
                 />
 
                 <ControlledFormField
@@ -363,6 +379,7 @@ export const ClassForm: FunctionComponent<ClassFormProps> = ({
                   inputProps={{
                     onInput: () => handleInput("finalPercent"),
                   }}
+                  disabled={isDisableEdit}
                 />
               </div>
 
@@ -382,7 +399,9 @@ export const ClassForm: FunctionComponent<ClassFormProps> = ({
                     size="sm"
                     onClick={addSchedule}
                     disabled={fields.length >= 7} // Max 7 days in a week
-                    className="flex items-center space-x-2"
+                    className={cn("flex items-center space-x-2", {
+                      hidden: isDisableEdit,
+                    })}
                   >
                     <Plus className="w-4 h-4" />
                     <span>Thêm lịch học</span>
@@ -413,6 +432,7 @@ export const ClassForm: FunctionComponent<ClassFormProps> = ({
                                       field.onChange(parseInt(value));
                                       handleScheduleChange(index, "dayOfWeek");
                                     }}
+                                    disabled={isDisableEdit}
                                   >
                                     <SelectTrigger className="transition-all duration-200 w-full">
                                       <SelectValue placeholder="Chọn ngày..." />
@@ -457,6 +477,7 @@ export const ClassForm: FunctionComponent<ClassFormProps> = ({
                                     field.onChange(parseInt(value));
                                     handleScheduleChange(index, "startPeriod");
                                   }}
+                                  disabled={isDisableEdit}
                                 >
                                   <SelectTrigger className="transition-all duration-200 w-full">
                                     <SelectValue placeholder="Chọn tiết..." />
@@ -491,6 +512,7 @@ export const ClassForm: FunctionComponent<ClassFormProps> = ({
                                     field.onChange(parseInt(value));
                                     handleScheduleChange(index, "endPeriod");
                                   }}
+                                  disabled={isDisableEdit}
                                 >
                                   <SelectTrigger className="transition-all duration-200 w-full">
                                     <SelectValue placeholder="Chọn tiết..." />
@@ -517,7 +539,12 @@ export const ClassForm: FunctionComponent<ClassFormProps> = ({
                             variant="outline"
                             size="sm"
                             onClick={() => removeSchedule(index)}
-                            className="text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
+                            className={cn(
+                              "text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200",
+                              {
+                                hidden: isDisableEdit,
+                              }
+                            )}
                           >
                             <Trash2 className="w-4 h-4" />
                           </Button>
@@ -569,23 +596,13 @@ export const ClassForm: FunctionComponent<ClassFormProps> = ({
                 </div>
               </div>
 
-              <SelectField
-                label="Trạng thái"
-                name="status"
-                placeholder="Chọn trạng thái..."
-                options={Object.values(EClassStatus).map((status) => ({
-                  label: ClassMapper.status[status],
-                  value: status,
-                }))}
-                control={control}
-                className={classData ? "" : "hidden"}
-              />
-
               <Button
                 type="submit"
                 disabled={isLoading || !isValid || !isDirty}
                 variant="primary"
-                className="w-full"
+                className={cn("w-full", {
+                  hidden: isDisableEdit,
+                })}
               >
                 {isLoading ? (
                   <LoaderButton

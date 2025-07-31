@@ -16,3 +16,5 @@ export * from "./alert-dialog";
 export * from "./calendar";
 export * from "./popover";
 export * from "./form";
+export * from "./dialog";
+export * from "./tooltip";

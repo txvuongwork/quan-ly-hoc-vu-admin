@@ -1,5 +1,6 @@
 import axiosInstance, { handleResponse } from "@/config/axios";
 import { QUERY_KEYS } from "@/constants";
+import type { TValidateSchema } from "@/pages/admin/classes/components";
 import type { CreateClassSchemaType } from "@/schemas";
 import type { IListResponse, IResponse } from "@/types";
 import type { TClass } from "@/types/class";
@@ -28,6 +29,9 @@ const classApi = {
 
   getById: (id: number | string | undefined): Promise<IResponse<TClass>> =>
     handleResponse(axiosInstance.get(`/classes/${id}`)),
+
+  updateStatus: (id: number, data: TValidateSchema) =>
+    handleResponse(axiosInstance.put(`/classes/${id}/status`, data)),
 };
 
 export const useGetClasses = (params: GetClassesParams) =>
@@ -56,4 +60,10 @@ export const useGetClassById = (id: number | string | undefined) =>
     staleTime: 0,
     gcTime: 0,
     enabled: !!id,
+  });
+
+export const useUpdateStatus = () =>
+  useMutation({
+    mutationFn: ({ id, data }: { id: number; data: { status: string } }) =>
+      classApi.updateStatus(id, data),
   });

@@ -51,7 +51,6 @@ export const createClassSchema = z
       .string()
       .min(1, "Phần trăm cuối kỳ là bắt buộc")
       .regex(/^(100|[1-9]?\d)$/, "Phần trăm cuối kỳ phải từ 0-100"),
-    status: z.string().optional(),
     schedules: z
       .array(createClassScheduleSchema)
       .min(1, "Cần ít nhất một lịch học")
