@@ -7,4 +7,5 @@ export type TUser = {
   fullName: string;
   role: EUserRole;
   major: TMajor;
+  studentCode: string;
 };

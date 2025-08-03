@@ -18,3 +18,4 @@ export * from "./popover";
 export * from "./form";
 export * from "./dialog";
 export * from "./tooltip";
+export * from "./tabs";

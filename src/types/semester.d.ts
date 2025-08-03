@@ -2,13 +2,11 @@ import type { ESemesterStatus } from "@/enums/semester";
 
 export type TSemester = {
   id: number;
+  semesterCode: string;
   semesterName: string;
-  year: number;
-  semesterNumber: number;
-  semesterStart: string;
-  semesterEnd: string;
-  registrationStart: string;
-  registrationEnd: string;
-  createdAt: string;
+  startDate: string;
+  endDate: string;
   status: ESemesterStatus;
+  createdAt: string;
+  updatedAt: string;
 };

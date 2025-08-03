@@ -12,6 +12,7 @@ export const QUERY_KEYS = {
   semesters: "semesters",
   classes: "classes",
   users: "users",
+  attendanceSessions: "attendance-sessions",
 };
 
 export const DATE_FORMAT = {

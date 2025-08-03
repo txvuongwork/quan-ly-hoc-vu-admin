@@ -2,14 +2,13 @@ import { CommonTable } from "@/components/table";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import type { BadgeVariantKeys } from "@/components/ui/variants";
 import { DAYS_OF_WEEK } from "@/constants";
-import { EClassStatus } from "@/enums";
 import { ClassMapper } from "@/mapper/class";
 import type { TClass } from "@/types/class";
 import { type ColumnDef } from "@tanstack/react-table";
-import { Edit, Pencil } from "lucide-react";
+import { Edit } from "lucide-react";
 import { useMemo } from "react";
+import { ClassStatusVariantMapper } from "../mapper";
 
 interface ClassesTableProps {
   data: TClass[];
@@ -21,7 +20,6 @@ interface ClassesTableProps {
   };
   onPageChange: (page: number) => void;
   onEdit: (id: number) => void;
-  onOpenChangeStatusModal: (classData: TClass) => void;
   isLoading?: boolean;
 }
 
@@ -37,19 +35,11 @@ const getPeriodLabel = (startPeriod: number, endPeriod: number) => {
   return `Tiết ${startPeriod} - ${endPeriod}`;
 };
 
-const StatusVariantMapper: Record<EClassStatus, BadgeVariantKeys> = {
-  [EClassStatus.OPENED]: "success",
-  [EClassStatus.CLOSED]: "default",
-  [EClassStatus.CANCELED]: "destructive",
-  [EClassStatus.WAITING_REGISTER]: "warning",
-};
-
 export function ClassesTable({
   data,
   pagination,
   onPageChange,
   onEdit,
-  onOpenChangeStatusModal,
   isLoading,
 }: ClassesTableProps) {
   const columns: ColumnDef<TClass>[] = useMemo(
@@ -99,7 +89,7 @@ export function ClassesTable({
             {row.original.schedules
               .map(
                 (schedule) =>
-                  `${getDayLabel(schedule.dayOfWeek)} - ${getPeriodLabel(
+                  `${getDayLabel(schedule.dayOfWeekValue)} - ${getPeriodLabel(
                     schedule.startPeriod,
                     schedule.endPeriod
                   )}`
@@ -114,7 +104,7 @@ export function ClassesTable({
         cell: ({ row }) => (
           <Badge
             className="px-2 py-1"
-            variant={StatusVariantMapper[row.original.status]}
+            variant={ClassStatusVariantMapper[row.original.status]}
           >
             {ClassMapper.status[row.original.status]}
           </Badge>
@@ -140,29 +130,12 @@ export function ClassesTable({
                 </TooltipTrigger>
                 <TooltipContent>Chỉnh sửa</TooltipContent>
               </Tooltip>
-
-              {[EClassStatus.OPENED, EClassStatus.WAITING_REGISTER].includes(
-                classData.status
-              ) && (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="warning"
-                      size="sm"
-                      onClick={() => onOpenChangeStatusModal(classData)}
-                    >
-                      <Pencil className="h-4 w-4" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>Cập nhật trạng thái</TooltipContent>
-                </Tooltip>
-              )}
             </div>
           );
         },
       },
     ],
-    [onEdit, onOpenChangeStatusModal]
+    [onEdit]
   );
 
   return (

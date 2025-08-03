@@ -19,8 +19,11 @@ export const EditClassPage: React.FunctionComponent = () => {
     isAnyFetching,
   } = useCommonData(["subjects", "semesters", "teachers"]);
 
-  const { data: classResponse, isFetching: isFetchingClass } =
-    useGetClassById(id);
+  const {
+    data: classResponse,
+    isFetching: isFetchingClass,
+    refetch,
+  } = useGetClassById(id);
   const { mutateAsync: updateClass, isPending: isUpdating } = useUpdateClass();
 
   const classData = classResponse?.ok ? classResponse.body : undefined;
@@ -63,6 +66,7 @@ export const EditClassPage: React.FunctionComponent = () => {
       isLoading={isUpdating}
       onSubmit={onSubmit}
       classData={classData}
+      refetch={refetch}
     />
   );
 };

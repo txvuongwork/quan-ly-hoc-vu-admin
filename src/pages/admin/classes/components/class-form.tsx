@@ -1,5 +1,7 @@
+import { useUpdateStatus } from "@/api/classApi";
 import { ControlledFormField, SelectField } from "@/components/form";
 import { Button, Form, LoaderButton } from "@/components/ui";
+import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -11,7 +13,9 @@ import {
 import { ROUTES } from "@/constants";
 import { EClassStatus, ESemesterStatus } from "@/enums";
 import { cn } from "@/lib/utils";
+import { ClassMapper } from "@/mapper/class";
 import { createClassSchema, type CreateClassSchemaType } from "@/schemas";
+import { translate } from "@/translate/helpers";
 import type {
   TClass,
   TClassSchedule,
@@ -21,19 +25,21 @@ import type {
 } from "@/types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AlertCircle, ArrowLeft, Plus, Trash2 } from "lucide-react";
-import { useMemo, type FunctionComponent } from "react";
+import { useMemo, useState, type FunctionComponent } from "react";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
+import { ClassStatusVariantMapper } from "../mapper";
+import { ChangeStatusModal } from "./change-status-modal";
 
 // Constants for schedules
 const DAYS_OF_WEEK = [
-  { value: "1", label: "Thứ 2" },
-  { value: "2", label: "Thứ 3" },
-  { value: "3", label: "Thứ 4" },
-  { value: "4", label: "Thứ 5" },
-  { value: "5", label: "Thứ 6" },
-  { value: "6", label: "Thứ 7" },
-  // { value: "7", label: "Chủ nhật" },
+  { value: "2", label: "Thứ 2" },
+  { value: "3", label: "Thứ 3" },
+  { value: "4", label: "Thứ 4" },
+  { value: "5", label: "Thứ 5" },
+  { value: "6", label: "Thứ 6" },
+  { value: "7", label: "Thứ 7" },
 ];
 
 const PERIODS = [
@@ -61,6 +67,7 @@ interface ClassFormProps {
   isLoading: boolean;
   onSubmit: (data: CreateClassSchemaType) => void;
   classData?: TClass & { schedules?: TClassSchedule[] };
+  refetch: () => void;
 }
 
 const getDefaultValue = (
@@ -79,7 +86,7 @@ const getDefaultValue = (
       finalPercent: "",
       schedules: [
         {
-          dayOfWeek: 1,
+          dayOfWeek: 2,
           startPeriod: 1,
           endPeriod: 1,
         },
@@ -99,19 +106,28 @@ const getDefaultValue = (
     schedules:
       classData.schedules && classData.schedules.length > 0
         ? classData.schedules.map((schedule) => ({
-            dayOfWeek: schedule.dayOfWeek,
+            dayOfWeek: schedule.dayOfWeekValue,
             startPeriod: schedule.startPeriod,
             endPeriod: schedule.endPeriod,
           }))
         : [
             {
-              dayOfWeek: 1,
+              dayOfWeek: 2,
               startPeriod: 1,
               endPeriod: 1,
             },
           ],
   };
 };
+
+type TChangeStatusModal =
+  | {
+      open: true;
+      type: "open" | "cancel";
+    }
+  | {
+      open: false;
+    };
 
 export const ClassForm: FunctionComponent<ClassFormProps> = ({
   subjects,
@@ -120,8 +136,17 @@ export const ClassForm: FunctionComponent<ClassFormProps> = ({
   isLoading,
   onSubmit,
   classData,
+  refetch,
 }) => {
   const navigate = useNavigate();
+
+  const { mutateAsync: updateStatus, isPending: isUpdatingStatus } =
+    useUpdateStatus();
+
+  const [changeStatusModal, setChangeStatusModal] =
+    useState<TChangeStatusModal>({
+      open: false,
+    });
 
   const form = useForm<CreateClassSchemaType>({
     resolver: zodResolver(createClassSchema),
@@ -144,6 +169,36 @@ export const ClassForm: FunctionComponent<ClassFormProps> = ({
   // Watch schedules to get real-time values for filtering available days
   const watchedSchedules = watch("schedules");
 
+  const handleOpenChangeStatusModal = (type: "open" | "cancel") => {
+    setChangeStatusModal({ open: true, type });
+  };
+
+  const onSubmitStatus = async () => {
+    if (!classData || !changeStatusModal.open) return;
+
+    await updateStatus(
+      {
+        id: classData.id,
+        data: {
+          status:
+            changeStatusModal.type === "open"
+              ? EClassStatus.CONFIRMED
+              : EClassStatus.CANCELLED,
+        },
+      },
+      {
+        onSuccess: (response) => {
+          if (response.ok) {
+            toast.success("Cập nhật trạng thái thành công");
+            refetch();
+          } else {
+            toast.error(translate(response.error.message));
+          }
+        },
+      }
+    );
+  };
+
   const subjectOptions = useMemo<TSelectOption[]>(
     () =>
       subjects.map((subject) => ({
@@ -156,9 +211,13 @@ export const ClassForm: FunctionComponent<ClassFormProps> = ({
   const semesterOptions = useMemo<TSelectOption[]>(
     () =>
       semesters
-        .filter((s) => s.status !== ESemesterStatus.COMPLETED)
+        .filter((s) =>
+          [ESemesterStatus.DRAFT, ESemesterStatus.REGISTRATION_OPEN].includes(
+            s.status
+          )
+        )
         .map((semester) => ({
-          label: `${semester.semesterName} - Năm ${semester.year}`,
+          label: `${semester.semesterName}`,
           value: semester.id.toString(),
         })),
     [semesters]
@@ -177,9 +236,11 @@ export const ClassForm: FunctionComponent<ClassFormProps> = ({
     if (!classData) return false;
 
     return [
-      EClassStatus.CLOSED,
-      EClassStatus.CANCELED,
-      EClassStatus.OPENED,
+      EClassStatus.OPEN_FOR_REGISTRATION,
+      EClassStatus.CANCELLED,
+      EClassStatus.COMPLETED,
+      EClassStatus.CONFIRMED,
+      EClassStatus.IN_PROGRESS,
     ].includes(classData.status);
   }, [classData]);
 
@@ -260,21 +321,61 @@ export const ClassForm: FunctionComponent<ClassFormProps> = ({
   return (
     <div className="bg-gray-50 py-8">
       <div className="max-w-2xl mx-auto px-4">
-        <div className="mb-8">
+        <div className="mb-8 flex items-center justify-between">
           <div className="flex items-center space-x-4">
             <button
               onClick={() =>
                 navigate(ROUTES.ADMIN.CLASSES?.ROOT || "/admin/classes")
               }
-              className="cursor-pointer flex items-center justify-center w-10 h-10 rounded-lg border border-gray-300 hover:border-button-primary hover:bg-blue-50 transition-all duration-200 group"
+              className="cursor-pointer flex items-center justify-center w-8 h-8 rounded-lg border border-gray-300 hover:border-button-primary hover:bg-blue-50 transition-all duration-200 group"
             >
-              <ArrowLeft className="w-5 h-5 text-gray-600 group-hover:text-button-primary" />
+              <ArrowLeft className="w-4 h-4 text-gray-600 group-hover:text-button-primary" />
             </button>
-            <h1 className="text-3xl font-bold text-gray-900">
+            <h1 className="text-2xl font-bold text-gray-900">
               {classData ? "Chỉnh sửa lớp học" : "Tạo lớp học mới"}
             </h1>
           </div>
+
+          <div
+            className={cn("flex items-center space-x-4", {
+              hidden:
+                !classData ||
+                classData.status !== EClassStatus.OPEN_FOR_REGISTRATION,
+            })}
+          >
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={() => handleOpenChangeStatusModal("open")}
+            >
+              Mở lớp
+            </Button>
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={() => handleOpenChangeStatusModal("cancel")}
+            >
+              Hủy lớp
+            </Button>
+          </div>
         </div>
+
+        {classData && (
+          <div className="flex items-center justify-between bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+            <label className="text-base font-medium text-gray-700">
+              Trạng thái hiện tại
+            </label>
+            <div className="flex items-center">
+              <Badge
+                size="lg"
+                variant={ClassStatusVariantMapper[classData.status]}
+              >
+                {ClassMapper.status[classData.status]}
+              </Badge>
+            </div>
+          </div>
+        )}
+
         <Form {...form}>
           <form
             className="bg-white rounded-lg shadow-sm border border-gray-200 p-6"
@@ -618,6 +719,15 @@ export const ClassForm: FunctionComponent<ClassFormProps> = ({
           </form>
         </Form>
       </div>
+
+      <ChangeStatusModal
+        open={changeStatusModal.open}
+        onClose={() => setChangeStatusModal({ open: false })}
+        onSubmit={onSubmitStatus}
+        classData={classData}
+        isLoading={isUpdatingStatus}
+        type={changeStatusModal.open ? changeStatusModal.type : undefined}
+      />
     </div>
   );
 };

@@ -16,7 +16,6 @@ import { cn } from "@/lib/utils";
 import { LoadingPage } from "@/pages/LoadingPage";
 import { useQueryClient } from "@tanstack/react-query";
 import {
-  Award,
   BookOpen,
   Calendar,
   ChevronRight,
@@ -24,9 +23,6 @@ import {
   GraduationCap,
   LogOut,
   School,
-  //   Settings,
-  UserCheck,
-  Users,
 } from "lucide-react";
 import { type FunctionComponent } from "react";
 import {
@@ -83,6 +79,11 @@ export const MainLayout: FunctionComponent = () => {
     if (currentUser.role === EUserRole.ADMIN) {
       return [
         {
+          title: "Quản lý học kỳ",
+          icon: Calendar,
+          href: ROUTES.ADMIN.SEMESTERS.ROOT,
+        },
+        {
           title: "Quản lý ngành học",
           icon: GraduationCap,
           href: ROUTES.ADMIN.MAJOR.ROOT,
@@ -117,49 +118,9 @@ export const MainLayout: FunctionComponent = () => {
 
     return [
       {
-        title: "Tổng quan",
-        icon: School,
-        href: ROUTES.APP.HOME,
-      },
-      {
-        title: "Quản lý sinh viên",
-        icon: Users,
-        href: "/students",
-      },
-      {
-        title: "Quản lý giảng viên",
-        icon: GraduationCap,
-        href: "/teachers",
-      },
-      {
-        title: "Quản lý môn học",
-        icon: BookOpen,
-        href: "/subjects",
-      },
-      {
         title: "Quản lý lớp học",
         icon: School,
-        href: "/classes",
-      },
-      {
-        title: "Quản lý học kỳ",
-        icon: Calendar,
-        href: "/semesters",
-      },
-      {
-        title: "Đăng ký học",
-        icon: ClipboardList,
-        href: "/enrollments",
-      },
-      {
-        title: "Điểm danh",
-        icon: UserCheck,
-        href: "/attendance",
-      },
-      {
-        title: "Quản lý điểm",
-        icon: Award,
-        href: "/grades",
+        href: ROUTES.TEACHER.ROOT,
       },
     ];
   };

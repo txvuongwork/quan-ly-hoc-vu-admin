@@ -1,11 +1,19 @@
 import axiosInstance, { handleResponse } from "@/config/axios";
 import { QUERY_KEYS } from "@/constants";
+import type { ESemesterStatus } from "@/enums";
 import type { IListResponse, IResponse, TSemester } from "@/types";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 
 type GetSemestersParams = {
   page: number;
   size: number;
+};
+
+export type TCreateSemesterRequest = {
+  semesterCode: string;
+  semesterName: string;
+  startDate: string;
+  endDate: string;
 };
 
 const semesterApi = {
@@ -16,7 +24,7 @@ const semesterApi = {
       axiosInstance.get("/semesters", {
         params: {
           ...params,
-          sortBy: "createdAt",
+          sortBy: "id",
           sortDirection: "desc",
         },
       })
@@ -29,6 +37,24 @@ const semesterApi = {
 
   getAllSemesters: (): Promise<IResponse<TSemester[]>> =>
     handleResponse(axiosInstance.get("/semesters/all")),
+
+  createSemester: (
+    data: TCreateSemesterRequest
+  ): Promise<IResponse<TSemester>> =>
+    handleResponse(axiosInstance.post("/semesters", data)),
+
+  updateSemester: (
+    id: number | string,
+    data: TCreateSemesterRequest
+  ): Promise<IResponse<TSemester>> =>
+    handleResponse(axiosInstance.put(`/semesters/${id}`, data)),
+
+  updateSemesterStatus: (id: number | string, status: ESemesterStatus) =>
+    handleResponse(
+      axiosInstance.patch(`/semesters/${id}/status`, {
+        status,
+      })
+    ),
 };
 
 export const useGetSemesters = (params: GetSemestersParams) =>
@@ -55,4 +81,32 @@ export const useGetAllSemesters = (enabled: boolean) =>
     staleTime: 0,
     gcTime: 0,
     enabled,
+  });
+
+export const useCreateSemester = () =>
+  useMutation({
+    mutationFn: (data: TCreateSemesterRequest) =>
+      semesterApi.createSemester(data),
+  });
+
+export const useUpdateSemester = () =>
+  useMutation({
+    mutationFn: ({
+      id,
+      data,
+    }: {
+      id: number | string;
+      data: TCreateSemesterRequest;
+    }) => semesterApi.updateSemester(id, data),
+  });
+
+export const useUpdateSemesterStatus = () =>
+  useMutation({
+    mutationFn: ({
+      id,
+      status,
+    }: {
+      id: number | string;
+      status: ESemesterStatus;
+    }) => semesterApi.updateSemesterStatus(id, status),
   });

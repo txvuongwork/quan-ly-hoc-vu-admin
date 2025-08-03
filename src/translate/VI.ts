@@ -17,4 +17,10 @@ export const VI = {
     "Không thể đóng lớp học này vì chưa được mở",
   "error.class.status-transition.invalid":
     "Lớp học đã hủy không thể chuyển sang trạng thái khác",
+  "error.enrollment.schedule-conflict": "Lịch học trùng với lớp học khác",
+  "error.validate.semester-code.existed": "Mã học kỳ đã tồn tại",
+  "error.semester.date-overlap":
+    "Thời gian diễn ra học kỳ trùng với học kỳ khác",
+  "error.semester.cannot-start.has-unconfirmed-classes":
+    "Không thể bắt đầu học kỳ này vì có lớp học chưa được xác nhận",
 };

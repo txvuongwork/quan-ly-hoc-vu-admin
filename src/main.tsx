@@ -28,6 +28,14 @@ const router = createBrowserRouter([
         element: <Pages.DashboardPage />,
       },
       {
+        path: ROUTES.APP.REGISTER_CLASS,
+        element: <Pages.RegisterClassPage />,
+      },
+      {
+        path: ROUTES.APP.USER_ATTENDANCE_SESSIONS,
+        element: <Pages.UserAttendanceSessionsPage />,
+      },
+      {
         path: ROUTES.ADMIN.ROOT,
         children: [
           {
@@ -116,6 +124,40 @@ const router = createBrowserRouter([
                 ),
               },
             ],
+          },
+          {
+            path: ROUTES.ADMIN.SEMESTERS.ROOT,
+            children: [
+              {
+                index: true,
+                element: <Pages.SemestersPage />,
+              },
+              {
+                path: ROUTES.ADMIN.SEMESTERS.CREATE,
+                element: <Pages.CreateSemesterPage />,
+              },
+              {
+                path: ROUTES.ADMIN.SEMESTERS.EDIT,
+                element: <Pages.EditSemesterPage />,
+              },
+            ],
+          },
+        ],
+      },
+      {
+        path: ROUTES.TEACHER.ROOT,
+        children: [
+          {
+            index: true,
+            element: <Pages.TeachClassesPage />,
+          },
+          {
+            path: ROUTES.TEACHER.CLASSES.DETAIL,
+            element: <Pages.TeachClassDetailPage />,
+          },
+          {
+            path: ROUTES.TEACHER.CLASSES.ATTENDANCE_SESSIONS.DETAIL,
+            element: <Pages.AttendanceSessionsPage />,
           },
         ],
       },

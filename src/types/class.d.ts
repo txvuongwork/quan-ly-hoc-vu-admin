@@ -1,13 +1,15 @@
-import type { EClassStatus } from "@/enums";
+import type { EClassStatus, ERegisteredClassStatus } from "@/enums";
 import type { TSemester } from "./semester";
 import type { TSubject } from "./subject";
 import type { TUser } from "./user";
 
 export type TClassSchedule = {
   id: number;
-  dayOfWeek: number;
+  dayOfWeek: string;
+  dayOfWeekValue: number;
   startPeriod: number;
   endPeriod: number;
+  timeSlotDisplay: string;
 };
 
 export type TClass = {
@@ -26,4 +28,13 @@ export type TClass = {
   status: EClassStatus;
   createdAt: string;
   schedules: TClassSchedule[];
+  enrolledCount: number;
+};
+
+export type TRegisteredClass = {
+  id: number;
+  user: TUser;
+  classEntity: TClass;
+  enrolledAt: string;
+  status: ERegisteredClassStatus;
 };

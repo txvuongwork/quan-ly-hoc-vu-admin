@@ -27,9 +27,11 @@ export const useLogin = () => {
         localStorage.setItem(ACCESS_TOKEN_KEY, response.body.token);
         queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.profile] });
         if (response.body.user.role === EUserRole.ADMIN) {
-          navigate(ROUTES.ADMIN.MAJOR.ROOT);
-        } else {
+          navigate(ROUTES.ADMIN.SEMESTERS.ROOT);
+        } else if (response.body.user.role === EUserRole.STUDENT) {
           navigate(ROUTES.APP.HOME);
+        } else {
+          navigate(ROUTES.TEACHER.ROOT);
         }
       } else {
         toast.error(translate(response.error.message));

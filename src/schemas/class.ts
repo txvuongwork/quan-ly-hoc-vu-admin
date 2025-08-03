@@ -4,8 +4,8 @@ export const createClassScheduleSchema = z
   .object({
     dayOfWeek: z
       .number()
-      .min(1, "Ngày trong tuần là bắt buộc")
-      .max(7, "Ngày trong tuần không hợp lệ"),
+      .min(2, "Ngày trong tuần là bắt buộc")
+      .max(8, "Ngày trong tuần không hợp lệ"),
     startPeriod: z
       .number()
       .min(1, "Tiết bắt đầu là bắt buộc")

@@ -1,49 +1,42 @@
-import { useGetClasses, useUpdateStatus } from "@/api/classApi";
-import { Button, Card, CardContent, ErrorState } from "@/components/ui";
+import { useGetClasses } from "@/api/classApi";
+import {
+  Button,
+  Card,
+  CardContent,
+  ErrorState,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui";
 import { ROUTES } from "@/constants";
+import { useCommonData } from "@/hooks/useCommonData";
 import { Plus } from "lucide-react";
 import { useState } from "react";
 import { generatePath, useNavigate } from "react-router-dom";
-import {
-  ChangeStatusModal,
-  ClassesTable,
-  type TValidateSchema,
-} from "./components";
-import type { TClass } from "@/types";
-import { translate } from "@/translate/helpers";
-import { toast } from "sonner";
+import { ClassesTable } from "./components";
 
 const pageSize = 10;
-
-type TChangeStatusModal =
-  | {
-      open: true;
-      classData: TClass;
-    }
-  | {
-      open: false;
-    };
 
 export function ClassesPage() {
   const navigate = useNavigate();
 
+  const [selectedSemester, setSelectedSemester] = useState<string>("");
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const [changeStatusModal, setChangeStatusModal] =
-    useState<TChangeStatusModal>({
-      open: false,
-    });
-
   const {
-    data: response,
-    isFetching,
-    refetch,
-  } = useGetClasses({
+    semesters: { data: semesters },
+  } = useCommonData(["semesters"]);
+
+  const { data: response, isFetching } = useGetClasses({
     page: currentPage - 1,
     size: pageSize,
+    semesterId: selectedSemester,
   });
-
-  const { mutateAsync: updateStatus, isPending: isUpdatingStatus } =
-    useUpdateStatus();
+  const semesterOptions = semesters.map((semester) => ({
+    label: semester.semesterName,
+    value: semester.id.toString(),
+  }));
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -55,10 +48,6 @@ export function ClassesPage() {
 
   const handleAddMajor = () => {
     navigate(ROUTES.ADMIN.CLASSES.CREATE);
-  };
-
-  const handleOpenChangeStatusModal = (classData: TClass) => {
-    setChangeStatusModal({ open: true, classData });
   };
 
   if (response && !response.ok) {
@@ -98,25 +87,6 @@ export function ClassesPage() {
         pageSize: pageSize,
       };
 
-  const onSubmit = async (id: number, data: TValidateSchema) => {
-    await updateStatus(
-      {
-        id,
-        data: { status: data.status },
-      },
-      {
-        onSuccess: (response) => {
-          if (response.ok) {
-            toast.success("Cập nhật trạng thái thành công");
-            refetch();
-          } else {
-            toast.error(translate(response.error.message));
-          }
-        },
-      }
-    );
-  };
-
   return (
     <div className="container mx-auto py-6 space-y-6">
       <div className="flex items-center justify-between">
@@ -128,27 +98,34 @@ export function ClassesPage() {
       </div>
 
       <Card>
-        <CardContent>
+        <CardContent className="space-y-5">
+          <div className="w-full">
+            <Select
+              value={selectedSemester}
+              onValueChange={setSelectedSemester}
+            >
+              <SelectTrigger className="w-1/3">
+                <SelectValue placeholder="Chọn học kì" />
+              </SelectTrigger>
+              <SelectContent>
+                {semesterOptions.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
           <ClassesTable
             data={tableData}
             pagination={paginationInfo}
             onPageChange={handlePageChange}
             onEdit={handleEdit}
-            onOpenChangeStatusModal={handleOpenChangeStatusModal}
             isLoading={isFetching}
           />
         </CardContent>
       </Card>
-
-      <ChangeStatusModal
-        open={changeStatusModal.open}
-        onClose={() => setChangeStatusModal({ open: false })}
-        onSubmit={onSubmit}
-        classData={
-          changeStatusModal.open ? changeStatusModal.classData : undefined
-        }
-        isLoading={isUpdatingStatus}
-      />
     </div>
   );
 }

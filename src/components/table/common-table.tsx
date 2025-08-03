@@ -7,6 +7,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { cn } from "@/lib/utils";
 import {
   type ColumnDef,
   flexRender,
@@ -123,7 +124,12 @@ export function CommonTable<T>({
         </Table>
       </div>
 
-      <div className="flex items-center justify-between px-2">
+      <div
+        className={cn(
+          "flex items-center justify-between px-2",
+          !pagination.totalItems && "hidden"
+        )}
+      >
         <div className="flex-1 text-sm text-muted-foreground">
           {isLoading ? (
             <div className="h-4 w-48 bg-muted animate-pulse rounded"></div>

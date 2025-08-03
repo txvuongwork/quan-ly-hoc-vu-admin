@@ -1,6 +1,5 @@
 import {
   AlertDialog,
-  AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
@@ -10,9 +9,7 @@ import {
   Button,
   LoaderButton,
 } from "@/components/ui";
-import { cn } from "@/lib/utils";
 import { AlertTriangle } from "lucide-react";
-import { buttonVariants } from "./button-variants";
 
 interface ConfirmDialogProps {
   isOpen: boolean;
@@ -39,7 +36,7 @@ export function ConfirmDialog({
 }: ConfirmDialogProps) {
   const handleConfirm = () => {
     onConfirm();
-    onClose();
+    // onClose();
   };
 
   return (
@@ -64,17 +61,13 @@ export function ConfirmDialog({
               {cancelText}
             </Button>
           </AlertDialogCancel>
-          <AlertDialogAction
-            className={cn(
-              variant === "destructive"
-                ? buttonVariants({ variant: "destructive" })
-                : buttonVariants({ variant: "primary" })
-            )}
+          <Button
+            variant={variant === "destructive" ? "destructive" : "primary"}
             onClick={handleConfirm}
             disabled={isLoading}
           >
             {isLoading ? <LoaderButton title="Đang xử lý..." /> : confirmText}
-          </AlertDialogAction>
+          </Button>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
